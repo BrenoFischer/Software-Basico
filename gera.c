@@ -1,3 +1,5 @@
+/* Breno Perricone Fischer 1810349 3WB */
+
 #include "gera.h"
 #include<stdlib.h>
 
@@ -40,7 +42,6 @@ void movVar1Const (unsigned char *codigo, int i, int idx) {
     byte = (idx >> (8*j)) & 0xFF;
     codigo[i+j] = byte;
    }
-   i+=4;
    /* fim mov const1 para aux1 */
 }
 void movVar2Const (unsigned char *codigo, int i, int idx) {
@@ -80,11 +81,17 @@ void movFimOperacaoA (unsigned char *codigo, int i, int idx) {
 
 
 funcp gera(FILE *f) {
+  unsigned char **enderecoLinha;
   unsigned char *codigo, byte;
-  int i,c,j=0,line=1;;
+  int guardaN[30];
+  int i,c,j=0,line=1,l=0,x=0,p,count=0;
+  
+  enderecoLinha = (unsigned char **) malloc (30*sizeof(double));
+  if (enderecoLinha == NULL) return NULL;
 
   /* aloca um valor equialente a 4000 bytes(abre espaco para o pior caso para 30 linhas de comandos    Simples) */
   codigo = (unsigned char *) malloc (4000*sizeof(char));
+  if (codigo == NULL) return NULL; 
 
   codigo[0] = 0x55; /* push %rbp */
   /* mov %rsp, %rbp */
@@ -92,7 +99,7 @@ funcp gera(FILE *f) {
   codigo[2] = 0x89; 
   codigo[3] = 0xe5;
   /* ************* */
-  /* sub 0x16, %rsp */
+  /* sub 0x10, %rsp */
   codigo[4] = 0x48;
   codigo[5] = 0x83;
   codigo[6] = 0xec;
@@ -100,7 +107,9 @@ funcp gera(FILE *f) {
   /* ************* */
 
   i=8;
+  l=0;
   while ((c = fgetc(f)) != EOF) {
+  enderecoLinha[l] = &codigo[i]; //guarda endereco da instrucao de cada linha
     switch (c) {
       case 'r': { /* retorno */
         char var0;
@@ -125,6 +134,9 @@ funcp gera(FILE *f) {
           codigo[i+2] = atribuiMovVariavel(idx0);
           i+=3;
         }
+        codigo[i] = 0xc9; //leavq 
+        codigo[i+1] = 0xc3; //retq
+        i+=2;
         break;        
       }
       
@@ -219,12 +231,12 @@ funcp gera(FILE *f) {
                 movVar2V(codigo, i, idx2);
                 i+=4;
               }
-              else if (var2 == '$'){ //V + CONST
+              else if (var2 == '$') { // V + Const
                 movVar2Const(codigo, i, idx2);
                 i+=6;
               }
             }
-            else if (var1 == '$') { //var 1 = const
+            else if (var1 == '$') { //var1 = const
               movVar1Const(codigo, i, idx1);
               i+=5;
               if (var2 == '$') { //Const + const
@@ -244,7 +256,40 @@ funcp gera(FILE *f) {
             /* fim add ************ */
           }
           else if (op == '*') { //operacao '*'
+            if (var1 == '$') { //var 1 = constante
+              movVar1Const(codigo, i, idx1);
+              i+=5;
 
+              if (var2 == '$') { //CONST * CONST
+                movVar2Const(codigo, i, idx2);
+                i+=6;
+              }
+
+              else if (var2 == 'v') { //CONST * V
+                movVar2V(codigo, i, idx2);
+                i+=4;
+              } 
+            }
+            else if (var1 == 'v') { //var1 = v
+              movVar1V(codigo, i, idx1);
+              i+=3;
+
+              if (var2 == 'v') { //V * V
+                movVar2V(codigo, i, idx2);
+                i+=4;
+              }
+              else if (var2 == '$') { //V * CONST
+                movVar2Const(codigo, i, idx2);
+                i+=6;
+              }
+            }
+            /* imul aux2=aux1 * aux2 */
+            codigo[i] = 0x41;
+            codigo[i+1] = 0x0f;
+            codigo[i+2] = 0xaf;
+            codigo[i+3] = 0xc8;
+            i+=4;
+            /* fim imul ************ */
           }
           /* ****** mov aux2 para v ******* */
           movFimOperacaoA(codigo, i, idx0);
@@ -253,11 +298,39 @@ funcp gera(FILE *f) {
         }
         break;
       }
+      case 'i': { /* desvio condicional */
+        char var0;
+        int idx0, n;
+        if (fscanf(f, "flez %c%d %d", &var0, &idx0, &n) !=3)
+          error("comando invalido", line);
+        
+        codigo[i] = 0x83;
+        codigo[i+1] = 0x7d;
+        codigo[i+2] = atribuiMovVariavel(idx0);
+        codigo[i+3] = 0x00;
+        codigo[i+4] = 0x7e;
+        codigo[i+5] = 0x00; //sera substituido pelo endereco da (linha n - linha i+6)
+        guardaN[x] = n; //guarda a linha que sera desviada
+        x++;
+        i+=6;
+        break;
+      }
     }
     line ++;
+    l++;
     fscanf(f, " "); 
   }
-  codigo[i] = 0xc9; //leavq 
-  codigo[i+1] = 0xc3; //retq
+  for (p=0;p<i;p++) {
+    if (codigo[p] == 0x7e) {
+      codigo[p+1] = enderecoLinha[guardaN[count]-1] - &codigo[p+2];
+      count++;
+    }
+  }  
   return (funcp)codigo;
 }
+
+
+void libera (void *pf) {
+  free(pf);
+}
+
