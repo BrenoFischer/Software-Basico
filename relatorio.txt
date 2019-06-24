@@ -1,0 +1,256 @@
+/* Breno Perricone Fischer 18101349 3WB */
+
+Serão apresentados os casos de teste para cada funcionalidade implementada geradora do código de máquina da linguagem Simples. Para não alongar os casos de teste, variáveis de índices diferentes (assim como parâmetros), irão variar para cada caso de teste, verificando se, para cada índicie, também funciona.
+
+/***** Inicio testes de retorno *****/
+- Testes de retorno:
+  - Retorno de constante:
+    Simples:
+      ret $1
+    Valor exibido:
+      1
+
+
+  - Retorno de variável:
+      Simples:
+        v1 < $-5
+        ret v1
+      Valor exibido:
+        -5
+/**** Fim testes de retorno *****/
+
+
+
+/****** Inicio testes de atribuição ******/   
+- Testes de atribuição:
+  - Atribuição Variável < Constante
+      Simples:
+        v2 < $-5
+        ret v2
+      Valor exibido:
+        -5
+
+   - Atribuição Variável < Parâmetro (p1 = 100, p2 = 1)
+     Simples:
+       v3 < p1
+       v3 < p2
+       ret v3
+      Valor exibido:
+        1
+
+     
+    - Atribuição Variável < Variável
+      Simples:
+        v4 < $3
+        v5 < v4
+        ret v5
+      Valor exibido:
+        3
+/**** Fim testes de atribuição *****/
+
+
+
+/****** Inicio testes de operação aritmética ******/
+- Testes de operação aritmética
+  - Operador "-"
+    - v = Constante - Constante
+      Simples:
+        v1 = $3 - $18 
+        ret v1
+      Valor exibido:
+        -15
+
+    - v = Variavel - Constante
+      Simples:
+        v1 < $3
+        v2 = v1 - $4
+        ret v2
+      Valor exibido:
+        -1
+
+     - v = Constante - Variavel
+       Simples:
+         v4 < $3
+         v5 = $10 - v4
+         ret v5
+       Valor exibido:
+         7
+
+     - v = Variavel - Variavel
+       Simples:
+         v1 < $5
+         v3 < $1
+         v5 = v1 - v3
+         ret v5
+       Valor exibido:
+         4
+
+  - Operador "+"
+    - v = Constante + Constante
+      Simples:
+        v2 = $3 + $5
+        ret v2
+      Valor exibido:
+        8
+
+    - v = Constante + Variavel
+      Simples:
+        v1 < $5
+        v2 = $3 + v1
+        ret v2
+      Valor exibido:
+        8
+
+    - v = Variavel + Constante
+      Simples:
+        v3 < $1
+        v4 = v3 + $10
+        ret v4
+      Valor exibido:
+        11
+
+    - v = Variavel + Variavel
+      Simples:
+        v5 < $5
+        v2 < $2
+        v4 = v2 + v5
+        ret v4
+      Valor exibido:
+        7
+
+  - Operador "*"
+    - v = Constante * Constante
+      Simples:
+        v4 = $3 * $4
+        ret v4
+      Valor exibido:
+        12
+
+    - v = Constante * Variavel
+      Simples:
+        v2 < $2
+        v1 = $3 * v2
+        ret v1
+      Valor exibido:
+        6
+
+    - v = Variavel * Constante
+      Simples:
+        v5 < $5
+        v1 = v5 * $1000
+        ret v1
+      Valor exibido:
+        5000
+
+    - v = Variavel * Variavel
+      Simples:
+        v4 < $0
+        v5 < $100
+        v3 = v4 * v5
+        ret v3
+      Valor exibido:
+        0
+/**** Fim testes de operação aritmética *****/
+
+
+
+
+/****** Início testes de desvio condicional *******/
+- Testes de desvio condicional:
+  - Testando desvio com diferentes pontos de retorno (para p1 = -5):
+    Simples:
+      v1 < p1
+      v1 = v1 + $1
+      iflez v1 5
+      ret $0
+      ret $1
+    Valor exibido:
+      1
+
+  - Testando desvio com diferentes pontos de retorno (para p1 = 0):
+    Simples:
+      v1 < p1
+      v1 = v1 + $1
+      iflez v1 5
+      ret $0
+      ret $1
+    Valor exibido:
+      0
+/**** Fim testes de desvio condicional *****/
+
+
+
+
+/***** Inicio testes extras *****/
+- Teste f(x) = x + 1 (p1 = 100)
+  Simples:
+    v1 < p1
+    v1 = v1 + $1 
+    ret v1
+  Valor exibido:
+    101
+
+- Teste f(x,y) = (x+y) * (x-y) (p1 = 5, p2 = 2)
+  Simples:
+    v1 < p1
+    v2 < p2
+    v3 = v1 + v2
+    v4 = v1 - v2
+    v1 = v3 * v4
+    ret v1
+  Valor exibido:
+    21
+
+- Teste f(x,y) = (x+y) * (x-y) (p1 = 1, p2 = 4)
+  Simples:
+    v1 < p1
+    v2 < p2
+    v3 = v1 + v2
+    v4 = v1 - v2
+    v1 = v3 * v4
+    ret v1
+  Valor exibido:
+    -15
+
+- Teste função fatorial:
+  Simples:
+    v1 < p3
+    v2 < $1
+    v3 < $0
+    iflez v1 8
+    v2 = v2 * v1
+    v1 = v1 - $1
+    iflez v3 4
+    ret v2
+  Valor exibido:
+    120
+
+- Teste multiplicação de todos os parâmetros com desvio condicional
+/**** Fim testes extras *****/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      
+      
+
+
