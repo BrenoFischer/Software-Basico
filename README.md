@@ -9,8 +9,9 @@ Developed in C language, the program accepts a .txt file written in the "simple"
 The fictional language only contains:
   * ret (Return a variable or a const)
   * < (Variable assignment)
-  * Aritmetics operations:
-    * - 
-    * +
-    * *
+  
+  Aritmetics operations:
+  * "-"
+  * "+"
+  * "*"
   * iflez (jump)
